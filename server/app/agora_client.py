@@ -91,7 +91,7 @@ class AgoraClient:
             if is_sol:
                 system_prompt = system_prompt.replace("Luna", "Sol")
                 system_prompt = system_prompt.replace("female", "male")
-                voice_id = "English_charming_male1"
+                voice_id = "English_magnetic_voiced_man"
 
         return (
             Agent(
