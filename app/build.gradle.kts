@@ -69,6 +69,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
             val keystorePath = localOrEnv("KEYSTORE_PATH", "release.jks")
             val keystoreFile = file(keystorePath)
             if (keystoreFile.exists()) {

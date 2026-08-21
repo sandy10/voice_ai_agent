@@ -54,9 +54,19 @@ class AudioSessionManager(
         selfSpeechFilter.clear()
         turnManager.reset()
         previousAudioMode = audioManager.mode
+        @Suppress("DEPRECATION")
         previousSpeakerphoneState = audioManager.isSpeakerphoneOn
         audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-        audioManager.isSpeakerphoneOn = true
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            val speakerDevice = audioManager.availableCommunicationDevices.firstOrNull { 
+                it.type == android.media.AudioDeviceInfo.TYPE_BUILTIN_SPEAKER 
+            }
+            speakerDevice?.let { audioManager.setCommunicationDevice(it) }
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.isSpeakerphoneOn = true
+        }
         updateNativeTrackDiagnostics(
             nativeMicTrackActive = true,
             customAudioTrackActive = false,
@@ -175,7 +185,12 @@ class AudioSessionManager(
 
     private fun restoreAudioRoute() {
         audioManager.mode = previousAudioMode
-        audioManager.isSpeakerphoneOn = previousSpeakerphoneState
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            audioManager.clearCommunicationDevice()
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager.isSpeakerphoneOn = previousSpeakerphoneState
+        }
     }
 
     private fun updateNativeTrackDiagnostics(
