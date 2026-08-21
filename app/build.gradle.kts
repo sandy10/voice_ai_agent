@@ -50,7 +50,8 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreFile = file("release.jks")
+            val keystorePath = localOrEnv("KEYSTORE_PATH", "release.jks")
+            val keystoreFile = file(keystorePath)
             if (keystoreFile.exists()) {
                 storeFile = keystoreFile
                 storePassword = localOrEnv("KEYSTORE_PASSWORD")
@@ -68,7 +69,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            val keystoreFile = file("release.jks")
+            val keystorePath = localOrEnv("KEYSTORE_PATH", "release.jks")
+            val keystoreFile = file(keystorePath)
             if (keystoreFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
