@@ -9,6 +9,18 @@ services:
       - key: PYTHON_VERSION
         value: 3.10
       - key: AGORA_APP_ID
-        sync: false
+        value: bff530f247394302807754707c3c37f4
       - key: AGORA_APP_CERTIFICATE
-        sync: false
+        value: 372437f8184146cc9e0f8c634ad0d16b
+      - key: AGORA_AGENT_UID
+        value: "123456"
+      - key: ASR_MODEL
+        value: nova-3
+      - key: LLM_MODEL
+        value: gpt-4o-mini
+      - key: TTS_MODEL
+        value: speech_2_6_turbo
+      - key: TTS_VOICE_ID
+        value: English_captivating_female1
+      - key: ALLOWED_ORIGINS
+        value: "*"
