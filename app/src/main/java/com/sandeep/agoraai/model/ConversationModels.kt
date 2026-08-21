@@ -130,4 +130,8 @@ data class ConversationUiState(
     val currentMood: MoodSnapshot = MoodSnapshot(),
     val moodHistory: List<MoodEntry> = emptyList(),
     val journaledToday: Boolean = false,
-)
+    val selectedPersona: String = "luna",
+) {
+    val companionName: String
+        get() = selectedPersona.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.ROOT) else it.toString() }
+}

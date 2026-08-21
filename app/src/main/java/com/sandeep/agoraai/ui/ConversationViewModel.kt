@@ -135,6 +135,13 @@ class ConversationViewModel(
         _uiState.update { it.copy(isDarkTheme = !it.isDarkTheme) }
     }
 
+    fun togglePersona() {
+        _uiState.update { 
+            val newPersona = if (it.selectedPersona == "luna") "sol" else "luna"
+            it.copy(selectedPersona = newPersona)
+        }
+    }
+
     fun startConversation() {
         val currentState = _uiState.value
         if (currentState.isStarting || currentState.isStopping) {
@@ -201,6 +208,7 @@ class ConversationViewModel(
                         requesterRtcUid = requesterRtcUid,
                         agentMode = "mood_journal",
                         moodContext = buildMoodContextForAgent(),
+                        agentProfile = currentState.selectedPersona,
                     )
                 }
                 val inviteResult = inviteAttempt.getOrNull()

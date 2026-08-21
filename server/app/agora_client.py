@@ -80,10 +80,18 @@ class AgoraClient:
         expires_at = int(time.time()) + self.settings.token_expiry_seconds
         return token, token, expires_at
 
-    def _build_agent(self, system_prompt: str | None = None) -> Agent:
+    def _build_agent(self, system_prompt: str | None = None, agent_profile: str | None = None) -> Agent:
         greeting = "Hi there!"
+        voice_id = self.settings.tts_voice_id
+        
+        is_sol = agent_profile and agent_profile.lower() == "sol"
+        
         if system_prompt and ("Luna" in system_prompt or "journal" in system_prompt):
             greeting = "Hey there! I'd love to hear about your day. What's been on your mind?"
+            if is_sol:
+                system_prompt = system_prompt.replace("Luna", "Sol")
+                system_prompt = system_prompt.replace("female", "male")
+                voice_id = "English_charming_male1"
 
         return (
             Agent(
@@ -115,7 +123,7 @@ class AgoraClient:
             .with_tts(
                 MiniMaxTTS(
                     model=self.settings.tts_model,
-                    voice_id=self.settings.tts_voice_id,
+                    voice_id=voice_id,
                 )
             )
         )
@@ -131,7 +139,7 @@ class AgoraClient:
         if mood_context and system_prompt == MOOD_JOURNAL_PROMPT:
             system_prompt += f"\n\nContext from previous sessions:\n{mood_context}"
 
-        session = self._build_agent(system_prompt).create_async_session(
+        session = self._build_agent(system_prompt, agent_profile).create_async_session(
             channel=channel_name,
             agent_uid=str(self.settings.agent_uid),
             remote_uids=[str(requester_rtc_uid)],

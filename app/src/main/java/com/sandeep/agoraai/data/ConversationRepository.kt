@@ -21,12 +21,14 @@ class ConversationRepository(
         requesterRtcUid: String,
         agentMode: String? = "mood_journal",
         moodContext: String? = null,
+        agentProfile: String? = null,
     ): AgentInviteResult {
         return api.inviteAgent(
             channelName = channelName,
             requesterRtcUid = requesterRtcUid,
             agentMode = agentMode,
             moodContext = moodContext,
+            agentProfile = agentProfile,
         )
     }
 

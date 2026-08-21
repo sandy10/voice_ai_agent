@@ -76,6 +76,7 @@ class ConversationAgoraApi(
         requesterRtcUid: String,
         agentMode: String? = "mood_journal",
         moodContext: String? = null,
+        agentProfile: String? = null,
     ): AgentInviteResult {
         val body = service.join(
             request = JoinRequest(
@@ -84,6 +85,7 @@ class ConversationAgoraApi(
                     ?: throw IOException("The requester RTC UID must be numeric."),
                 agentMode = agentMode,
                 moodContext = moodContext,
+                agentProfile = agentProfile,
             ),
         ).requireBody()
         return AgentInviteResult(
@@ -169,6 +171,7 @@ class ConversationAgoraApi(
         @SerializedName("requester_rtc_uid") val requesterRtcUid: Int,
         @SerializedName("agent_mode") val agentMode: String? = null,
         @SerializedName("mood_context") val moodContext: String? = null,
+        @SerializedName("agent_profile") val agentProfile: String? = null,
     )
 
     private data class AgentActionRequest(

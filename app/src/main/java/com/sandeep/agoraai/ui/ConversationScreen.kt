@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.LightMode
@@ -106,6 +107,7 @@ fun ConversationScreen(
     onEndConversation: () -> Unit,
     onToggleMicrophone: () -> Unit,
     onToggleTheme: () -> Unit,
+    onTogglePersona: () -> Unit,
     onDismissMessages: () -> Unit,
 ) {
     VoiceAiAppScreen(
@@ -114,6 +116,7 @@ fun ConversationScreen(
         onEndConversation = onEndConversation,
         onToggleMicrophone = onToggleMicrophone,
         onToggleTheme = onToggleTheme,
+        onTogglePersona = onTogglePersona,
         onDismissMessages = onDismissMessages,
     )
 }
@@ -125,15 +128,25 @@ fun VoiceAiAppScreen(
     onEndConversation: () -> Unit,
     onToggleMicrophone: () -> Unit,
     onToggleTheme: () -> Unit,
+    onTogglePersona: () -> Unit,
     onDismissMessages: () -> Unit,
 ) {
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    LaunchedEffect(uiState.turnState) {
+        if (uiState.turnState == TurnState.AGENT_SPEAKING) {
+            haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+        }
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             MoodLensTopBar(
                 isDarkTheme = uiState.isDarkTheme,
+                selectedPersona = uiState.selectedPersona,
                 onToggleTheme = onToggleTheme,
+                onTogglePersona = onTogglePersona,
             )
         },
         bottomBar = {
@@ -196,8 +209,12 @@ fun VoiceAiAppScreen(
 @Composable
 private fun MoodLensTopBar(
     isDarkTheme: Boolean,
+    selectedPersona: String,
     onToggleTheme: () -> Unit,
+    onTogglePersona: () -> Unit,
 ) {
+    val companionName = selectedPersona.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+    
     Surface(
         modifier = Modifier.statusBarsPadding(),
         color = MaterialTheme.colorScheme.background.copy(alpha = 0.96f),
@@ -219,12 +236,20 @@ private fun MoodLensTopBar(
                     highlighted = true,
                     accentColor = MaterialTheme.colorScheme.primary,
                 )
-                AgentIconControlButton(
-                    icon = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
-                    contentDescription = if (isDarkTheme) "Switch to light theme" else "Switch to dark theme",
-                    active = isDarkTheme,
-                    onClick = onToggleTheme,
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AgentIconControlButton(
+                        icon = androidx.compose.material.icons.Icons.Filled.Person,
+                        contentDescription = "Switch Persona",
+                        active = selectedPersona == "sol",
+                        onClick = onTogglePersona,
+                    )
+                    AgentIconControlButton(
+                        icon = if (isDarkTheme) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                        contentDescription = if (isDarkTheme) "Switch to light theme" else "Switch to dark theme",
+                        active = isDarkTheme,
+                        onClick = onToggleTheme,
+                    )
+                }
             }
             Text(
                 text = "Voice Mood Journal",
@@ -232,7 +257,7 @@ private fun MoodLensTopBar(
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = "Talk to Luna, your AI companion. She'll help you reflect on your day while tracking your emotional landscape.",
+                text = "Talk to $companionName, your AI companion. They'll help you reflect on your day while tracking your emotional landscape.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
             )
@@ -292,6 +317,8 @@ private fun TodayMoodCard(
     currentMood: MoodSnapshot,
     moodHistory: List<MoodEntry>,
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     AgentCard {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -332,6 +359,22 @@ private fun TodayMoodCard(
                         maxLines = 3,
                     )
                 }
+
+                AgentButton(
+                    text = "Share entry",
+                    variant = AgentButtonVariant.Secondary,
+                    onClick = {
+                        val shareIntent = android.content.Intent().apply {
+                            action = android.content.Intent.ACTION_SEND
+                            putExtra(
+                                android.content.Intent.EXTRA_TEXT, 
+                                "My MoodLens for today is ${todayMood.dominantMood.emoji} ${todayMood.dominantMood.label}!\n\n\"${todayEntry?.transcriptSummary ?: "Just had a quick check-in."}\""
+                            )
+                            type = "text/plain"
+                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Journal Entry"))
+                    }
+                )
             } else {
                 Text(
                     text = "How are you feeling today?",
@@ -347,7 +390,7 @@ private fun TodayMoodCard(
                 )
 
                 Text(
-                    text = "Start a voice journal session with Luna to explore your emotions and build your mood timeline.",
+                    text = "Start a voice journal session with your AI companion to explore your emotions and build your mood timeline.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -368,7 +411,7 @@ private fun JournalStartCard(
     ) {
         LabeledIconText(
             icon = Icons.Outlined.Link,
-            label = "Your companion: Luna",
+            label = "Your companion: ${uiState.companionName}",
             value = "An empathetic AI that listens, reflects, and helps you process your day through natural conversation.",
         )
 
@@ -396,7 +439,7 @@ private fun JournalStartCard(
 
         AgentButton(
             text = if (uiState.isStarting) {
-                "Connecting to Luna..."
+                "Connecting to ${uiState.companionName}..."
             } else if (uiState.journaledToday) {
                 "Journal again today"
             } else {
@@ -435,6 +478,7 @@ fun MoodJournalSessionScreen(
                 label = uiState.agentStateLabel,
                 turnState = uiState.turnState,
                 currentMood = uiState.currentMood,
+                companionName = uiState.companionName,
             )
         }
 
@@ -450,6 +494,7 @@ fun MoodJournalSessionScreen(
             TranscriptPanel(
                 history = uiState.transcriptHistory,
                 liveTranscript = uiState.liveTranscript,
+                companionName = uiState.companionName,
             )
         }
 
@@ -472,10 +517,11 @@ private fun LiveMoodPresenceCard(
     label: String,
     turnState: TurnState,
     currentMood: MoodSnapshot,
+    companionName: String,
 ) {
     AgentCard(
         modifier = modifier,
-        title = "Luna",
+        title = companionName,
         subtitle = "Your mood journal companion",
     ) {
         Column(
@@ -491,8 +537,8 @@ private fun LiveMoodPresenceCard(
             )
 
             Text(
-                text = label.replace("cloud agent", "Luna")
-                    .replace("Agora agent", "Luna"),
+                text = label.replace("cloud agent", companionName)
+                    .replace("Agora agent", companionName),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
@@ -502,7 +548,7 @@ private fun LiveMoodPresenceCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 StatusChip(
-                    text = turnState.toReadableLabel(),
+                    text = turnState.toReadableLabel(companionName),
                     highlighted = true,
                     accentColor = visualState.accentColor(),
                 )
@@ -525,6 +571,7 @@ fun TranscriptPanel(
     modifier: Modifier = Modifier,
     history: List<TranscriptTurn>,
     liveTranscript: TranscriptTurn?,
+    companionName: String,
 ) {
     val listState = rememberLazyListState()
     val visibleTurns = buildList {
@@ -543,7 +590,7 @@ fun TranscriptPanel(
     AgentCard(
         modifier = modifier,
         title = "Conversation",
-        subtitle = "Your voice journal session with Luna.",
+        subtitle = "Your voice journal session with $companionName.",
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -570,7 +617,7 @@ fun TranscriptPanel(
                             isActive = true,
                         )
                         Text(
-                            text = "Luna is getting ready to listen...",
+                            text = "$companionName is getting ready to listen...",
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -596,7 +643,7 @@ fun TranscriptPanel(
                     state = listState,
                 ) {
                     items(items = visibleTurns, key = { it.key }) { turn ->
-                        TranscriptBubble(turn = turn)
+                        TranscriptBubble(turn = turn, companionName = companionName)
                     }
                 }
             }
@@ -607,6 +654,7 @@ fun TranscriptPanel(
 @Composable
 private fun TranscriptBubble(
     turn: TranscriptTurn,
+    companionName: String,
 ) {
     val isUser = turn.speaker == TranscriptSpeaker.USER
     val containerColor = when {
@@ -636,7 +684,7 @@ private fun TranscriptBubble(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 Text(
-                    text = if (isUser) "You" else "Luna",
+                    text = if (isUser) "You" else companionName,
                     style = MaterialTheme.typography.labelMedium,
                     color = contentColor.copy(alpha = 0.76f),
                     fontWeight = FontWeight.SemiBold,
@@ -725,6 +773,8 @@ fun BottomCallControls(
     onToggleMicrophone: () -> Unit,
     onEndConversation: () -> Unit,
 ) {
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+
     Surface(
         modifier = Modifier.navigationBarsPadding(),
         tonalElevation = 6.dp,
@@ -743,20 +793,29 @@ fun BottomCallControls(
                 icon = if (micEnabled) Icons.Outlined.Mic else Icons.Outlined.MicOff,
                 contentDescription = if (micEnabled) "Mute microphone" else "Unmute microphone",
                 active = micEnabled,
-                onClick = onToggleMicrophone,
+                onClick = {
+                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onToggleMicrophone()
+                },
             )
             AgentButton(
                 text = if (micEnabled) "Mute mic" else "Unmute mic",
                 modifier = Modifier.weight(1f),
                 variant = AgentButtonVariant.Secondary,
-                onClick = onToggleMicrophone,
+                onClick = {
+                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onToggleMicrophone()
+                },
             )
             AgentButton(
                 text = if (isStopping) "Saving mood..." else "End & save",
                 modifier = Modifier.weight(1f),
                 variant = AgentButtonVariant.Destructive,
                 enabled = !isStopping,
-                onClick = onEndConversation,
+                onClick = {
+                    haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+                    onEndConversation()
+                },
             )
         }
     }
@@ -1007,18 +1066,18 @@ private fun AgentVisualState.accentColor(): Color {
         AgentVisualState.LISTENING -> MaterialTheme.colorScheme.secondary
         AgentVisualState.THINKING -> MaterialTheme.colorScheme.tertiary
         AgentVisualState.SPEAKING -> MaterialTheme.colorScheme.primary
-        AgentVisualState.IDLE -> MaterialTheme.colorScheme.primary
+                        AgentVisualState.IDLE -> MaterialTheme.colorScheme.primary
         AgentVisualState.DISCONNECTED -> MaterialTheme.colorScheme.error
     }
 }
 
-private fun TurnState.toReadableLabel(): String {
+private fun TurnState.toReadableLabel(companionName: String): String {
     return when (this) {
-        TurnState.IDLE -> "Standing by"
+        TurnState.IDLE -> "Ready"
         TurnState.USER_SPEAKING -> "Listening to you"
         TurnState.USER_TURN_FINALIZING -> "Processing..."
-        TurnState.AGENT_THINKING -> "Luna is thinking"
-        TurnState.AGENT_SPEAKING -> "Luna is speaking"
+        TurnState.AGENT_THINKING -> "$companionName is thinking"
+        TurnState.AGENT_SPEAKING -> "$companionName is speaking"
         TurnState.BARGE_IN_DETECTED -> "Interrupted"
     }
 }
@@ -1051,6 +1110,7 @@ private fun PreSessionPreview() {
             onEndConversation = {},
             onToggleMicrophone = {},
             onToggleTheme = {},
+            onTogglePersona = {},
             onDismissMessages = {},
         )
     }
@@ -1072,6 +1132,7 @@ private fun ConnectedSessionPreview() {
             onEndConversation = {},
             onToggleMicrophone = {},
             onToggleTheme = {},
+            onTogglePersona = {},
             onDismissMessages = {},
         )
     }
