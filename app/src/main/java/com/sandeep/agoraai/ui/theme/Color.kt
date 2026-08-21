@@ -1,0 +1,63 @@
+package com.sandeep.agoraai.ui.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Cyan = Color(0xFF00C2FF)
+val CyanLight = Color(0xFFA0FAFF)
+val Blue = Color(0xFF075C9A)
+val Violet = Color(0xFFC46FFB)
+val VioletDark = Color(0xFF9443C7)
+
+val Neutral950 = Color(0xFF0F0F0F)
+val Neutral900 = Color(0xFF171717)
+val Neutral800 = Color(0xFF2C2C2C)
+val Neutral700 = Color(0xFF484848)
+val Neutral600 = Color(0xFF626262)
+val Neutral400 = Color(0xFFB3B3B3)
+val Neutral300 = Color(0xFFD6D6D6)
+val Neutral200 = Color(0xFFE7E6E6)
+val Neutral100 = Color(0xFFF1F0F0)
+val Neutral50 = Color(0xFFFCF9F8)
+
+val WarmBackground = Color(0xFFFDFBFC)
+val WarmForeground = Color(0xFF0A0A0A)
+val WarmCard = Color(0xFFFFFFFF)
+val WarmPrimary = Color(0xFF00658D)
+val WarmPrimaryForeground = Color(0xFFFDFBFC)
+val WarmMuted = Color(0xFFF8F3F1)
+val WarmMutedForeground = Color(0xFF757575)
+val WarmBorder = Color(0xFFE7E6E6)
+val WarmSuccess = Color(0xFF308D2C)
+val WarmDestructive = Color(0xFFE7000B)
+val WarmWarning = Color(0xFFF59E0B)
+val WarmSidebar = Color(0xFFFDFBFC)
+val WarmSidebarBorder = Color(0xFFE7E6E6)
+
+val DarkBackground = Color(0xFF000000)
+val DarkForeground = Color(0xFFFDFCFB)
+val DarkCard = Color(0xFF0A0A0A)
+val DarkPrimary = Color(0xFF00C2FF)
+val DarkPrimaryForeground = Color(0xFF171717)
+val DarkMuted = Color(0xFF212121)
+val DarkMutedForeground = Color(0xFFB3B3B3)
+val DarkBorder = Color(0xFF383838)
+val DarkSuccess = Color(0xFF42B03D)
+val DarkDestructive = Color(0xFFDC383E)
+val DarkWarning = Color(0xFFF59E0B)
+val DarkSidebar = Color(0xFF171717)
+val DarkSidebarBorder = Color(0xFF212121)
+
+// MoodLens — Mood dimension colors
+val MoodJoy = Color(0xFFFFC107)
+val MoodCalm = Color(0xFF64B5F6)
+val MoodEnergy = Color(0xFF66BB6A)
+val MoodStress = Color(0xFFEF5350)
+val MoodSadness = Color(0xFFAB47BC)
+
+// MoodLens — Calming accent colors
+val MoodPrimaryLight = Color(0xFF5C9EAD)
+val MoodPrimaryDark = Color(0xFF7EC8D8)
+val MoodBackgroundLight = Color(0xFFF8FAFB)
+val MoodBackgroundDark = Color(0xFF0A1014)
+val MoodSurfaceLight = Color(0xFFFFFFFE)
+val MoodSurfaceDark = Color(0xFF111A1F)
