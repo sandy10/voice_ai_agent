@@ -19,3 +19,29 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# --- Agora Proguard Rules ---
+-keep class io.agora.**{*;}
+-dontwarn io.agora.**
+
+# --- Retrofit and Gson Rules ---
+# Retrofit does reflection, require the following rules
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+-keepclasseswithmembers class * {
+    @retrofit2.http.* <methods>;
+}
+
+# Gson specific classes
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
+-keep class com.google.gson.examples.android.model.** { <fields>; }
+
+# Keep App Data Models for Gson serialization/deserialization
+-keep class com.sandeep.agoraai.data.** { *; }
+-keep class com.sandeep.agoraai.model.** { *; }
+
+# Keep Compose classes safe
+-keep class androidx.compose.** { *; }
+
