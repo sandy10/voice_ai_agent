@@ -41,6 +41,10 @@
 # Keep App Data Models for Gson serialization/deserialization
 -keep class com.sandeep.agoraai.data.** { *; }
 -keep class com.sandeep.agoraai.model.** { *; }
+-keep class com.sandeep.agoraai.mood.** { *; }
+
+# Prevent R8 from stripping generic signatures from TypeToken subclasses
+-keep class * extends com.google.gson.reflect.TypeToken
 
 # Keep Compose classes safe
 -keep class androidx.compose.** { *; }
