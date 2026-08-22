@@ -32,7 +32,9 @@ class MoodStorage(context: Context) {
         val json = prefs.getString(entriesKey, null) ?: return emptyList()
         val type = object : TypeToken<List<MoodEntry>>() {}.type
         return try {
-            gson.fromJson(json, type) ?: emptyList()
+            val list: List<MoodEntry>? = gson.fromJson(json, type)
+            // Filter out invalid entries where gson bypassed null-safety due to previous obfuscation
+            list?.filter { it != null && it.mood != null && it.date != null } ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }
