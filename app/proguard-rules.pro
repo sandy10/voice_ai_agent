@@ -49,3 +49,9 @@
 # Keep Compose classes safe
 -keep class androidx.compose.** { *; }
 
+
+# --- Google Play Core In-App Updates ---
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.gms.tasks.** { *; }
+-dontwarn com.google.android.gms.tasks.**
