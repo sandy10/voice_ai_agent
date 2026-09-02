@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">Agora Voice AI Quickstart</string>
-    <string name="moodlens">MoodLens</string>
+    <string name="app_name">MoodLens AI</string>
+    <string name="moodlens">MoodLens AI</string>
     <string name="switch_persona">Switch Persona</string>
     <string name="voice_mood_journal">Voice Mood Journal</string>
     <string name="today_s_mood">Today\'s mood</string>
